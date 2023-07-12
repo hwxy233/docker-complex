@@ -43,6 +43,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./client
+          push: true
           tags: |
             hwxy233/multi-client:latest
             hwxy233/multi-client:${{ github.sha }}
@@ -51,6 +52,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./nginx
+          push: true
           tags: |
             hwxy233/multi-nginx:latest
             hwxy233/multi-nginx:${{ github.sha }}
@@ -59,6 +61,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./server
+          push: true
           tags: |
             hwxy233/multi-server:latest
             hwxy233/multi-server:${{ github.sha }}
@@ -67,6 +70,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./worker
+          push: true
           tags: |
             hwxy233/multi-worker:latest
             hwxy233/multi-worker:${{ github.sha }}
