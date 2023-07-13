@@ -110,12 +110,12 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           images: |
-            '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_CLIENT }}'
-            '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_NGINX }}'
-            '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_SERVER }}'
-            '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_WORKER }}'
-            '${{ env.REGISTRY }}/postgres:latest'
-            '${{ env.REGISTRY }}/redis:latest'
+            # '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_CLIENT }}'
+            # '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_NGINX }}'
+            # '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_SERVER }}'
+            # '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_WORKER }}'
+            # '${{ env.REGISTRY }}/postgres:latest'
+            # '${{ env.REGISTRY }}/redis:latest'
             'mcr.microsoft.com/oss/bitnami/redis:6.0.8'
             'mcr.microsoft.com/azuredocs/azure-vote-front:v1'
           configuration-file: ./docker-compose-test.yml
