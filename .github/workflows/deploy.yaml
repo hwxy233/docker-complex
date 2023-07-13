@@ -21,78 +21,78 @@ env:
   AZURE_WEBAPP_NAME: hwxy233-docker-complex
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v3
-      -
-        name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      -
-        name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
-        name: Build and export to Docker
-        uses: docker/build-push-action@v4
-        with:
-          context: ./client
-          # use full file path, default is {context}/Dockerfile, but I don't use the default one.
-          file: ./client/Dockerfile.dev
-          load: true
-          tags: ${{ env.IMAGE_NAME_MUTLTI_CLIENT }}:test
-      -
-        name: Test
-        # -e CI=true will set a env variable used by container, npm test will use this
-        run: | 
-          docker run -e CI=true --rm hwxy233/multi-client:test npm test
-      -
-        name: Build and push multi-client
-        uses: docker/build-push-action@v4
-        with:
-          context: ./client
-          push: true
-          tags: |
-            ${{ env.IMAGE_NAME_MUTLTI_CLIENT }}:latest
-            ${{ env.IMAGE_NAME_MUTLTI_CLIENT }}:${{ github.sha }}
-      -
-        name: Build and push multi-nginx
-        uses: docker/build-push-action@v4
-        with:
-          context: ./nginx
-          push: true
-          tags: |
-            ${{ env.IMAGE_NAME_MUTLTI_NGINX }}:latest
-            ${{ env.IMAGE_NAME_MUTLTI_NGINX }}:${{ github.sha }}
-      -
-        name: Build and push multi-server
-        uses: docker/build-push-action@v4
-        with:
-          context: ./server
-          push: true
-          tags: |
-            ${{ env.IMAGE_NAME_MUTLTI_SERVER }}:latest
-            ${{ env.IMAGE_NAME_MUTLTI_SERVER }}:${{ github.sha }}
-      -
-        name: Build and push multi-worker
-        uses: docker/build-push-action@v4
-        with:
-          context: ./worker
-          push: true
-          tags: |
-            ${{ env.IMAGE_NAME_MUTLTI_WORKER }}:latest
-            ${{ env.IMAGE_NAME_MUTLTI_WORKER }}:${{ github.sha }}
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     -
+  #       name: Checkout
+  #       uses: actions/checkout@v3
+  #     -
+  #       name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v2
+  #     -
+  #       name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v2
+  #     -
+  #       name: Login to Docker Hub
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     -
+  #       name: Build and export to Docker
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: ./client
+  #         # use full file path, default is {context}/Dockerfile, but I don't use the default one.
+  #         file: ./client/Dockerfile.dev
+  #         load: true
+  #         tags: ${{ env.IMAGE_NAME_MUTLTI_CLIENT }}:test
+  #     -
+  #       name: Test
+  #       # -e CI=true will set a env variable used by container, npm test will use this
+  #       run: | 
+  #         docker run -e CI=true --rm hwxy233/multi-client:test npm test
+  #     -
+  #       name: Build and push multi-client
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: ./client
+  #         push: true
+  #         tags: |
+  #           ${{ env.IMAGE_NAME_MUTLTI_CLIENT }}:latest
+  #           ${{ env.IMAGE_NAME_MUTLTI_CLIENT }}:${{ github.sha }}
+  #     -
+  #       name: Build and push multi-nginx
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: ./nginx
+  #         push: true
+  #         tags: |
+  #           ${{ env.IMAGE_NAME_MUTLTI_NGINX }}:latest
+  #           ${{ env.IMAGE_NAME_MUTLTI_NGINX }}:${{ github.sha }}
+  #     -
+  #       name: Build and push multi-server
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: ./server
+  #         push: true
+  #         tags: |
+  #           ${{ env.IMAGE_NAME_MUTLTI_SERVER }}:latest
+  #           ${{ env.IMAGE_NAME_MUTLTI_SERVER }}:${{ github.sha }}
+  #     -
+  #       name: Build and push multi-worker
+  #       uses: docker/build-push-action@v4
+  #       with:
+  #         context: ./worker
+  #         push: true
+  #         tags: |
+  #           ${{ env.IMAGE_NAME_MUTLTI_WORKER }}:latest
+  #           ${{ env.IMAGE_NAME_MUTLTI_WORKER }}:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build
+    # needs: build
 
     steps:
       -
@@ -116,7 +116,9 @@ jobs:
             '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_WORKER }}'
             '${{ env.REGISTRY }}/postgres:latest'
             '${{ env.REGISTRY }}/redis:latest'
-          configuration-file: ./docker-compose.yml
+            'mcr.microsoft.com/oss/bitnami/redis:6.0.8'
+            'mcr.microsoft.com/azuredocs/azure-vote-front:v1'
+          configuration-file: ./docker-compose-test.yml
           
       - 
         name: Azure logout
