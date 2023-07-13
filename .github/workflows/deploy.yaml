@@ -43,13 +43,14 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./client
+          # use full file path, default is {context}/Dockerfile, but I don't use the default one.
           file: ./client/Dockerfile.dev
           load: true
           tags: hwxy233/multi-client:test
       -
         name: Test
-        run: |
-          docker run --rm hwxy233/multi-client:test
+        run: | 
+          docker run -e CI=true --rm hwxy233/multi-client:test npm test
       -
         name: Build and push multi-client
         uses: docker/build-push-action@v4
