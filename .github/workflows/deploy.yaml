@@ -49,6 +49,7 @@ jobs:
           tags: hwxy233/multi-client:test
       -
         name: Test
+        # -e CI=true will set a env variable used by container, npm test will use this
         run: | 
           docker run -e CI=true --rm hwxy233/multi-client:test npm test
       -
