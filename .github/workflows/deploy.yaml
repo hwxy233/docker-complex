@@ -114,8 +114,9 @@ jobs:
             '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_NGINX }}'
             '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_SERVER }}'
             '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_WORKER }}'
+            '${{ env.REGISTRY }}/postgres:latest'
+            '${{ env.REGISTRY }}/redis:latest'
           configuration-file: ./docker-compose.yml
-          startup-command: "docker compose up -d"
           
       - 
         name: Azure logout
