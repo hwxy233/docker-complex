@@ -9,18 +9,19 @@ on:
   push:
     branches: [ "feature-test" ]
   pull_request:
-    branches: [ "master-test" ]
+    branches: [ "feature-test" ]
 
 env:
   # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}
-
+  REGISTRY: docker.io
+  IMAGE_NAME_MUTLTI_CLIENT: hwxy233/multi-client
+  IMAGE_NAME_MUTLTI_SERVER: hwxy233/multi-server
+  IMAGE_NAME_MUTLTI_NGINX: hwxy233/multi-nginx
+  IMAGE_NAME_MUTLTI_WORKER: hwxy233/multi-worker
+  AZURE_WEBAPP_NAME: hwxy233-docker-complex
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     steps:
       -
@@ -46,7 +47,7 @@ jobs:
           # use full file path, default is {context}/Dockerfile, but I don't use the default one.
           file: ./client/Dockerfile.dev
           load: true
-          tags: hwxy233/multi-client:test
+          tags: ${{ env.IMAGE_NAME_MUTLTI_CLIENT }}:test
       -
         name: Test
         # -e CI=true will set a env variable used by container, npm test will use this
@@ -59,8 +60,8 @@ jobs:
           context: ./client
           push: true
           tags: |
-            hwxy233/multi-client:latest
-            hwxy233/multi-client:${{ github.sha }}
+            ${{ env.IMAGE_NAME_MUTLTI_CLIENT }}:latest
+            ${{ env.IMAGE_NAME_MUTLTI_CLIENT }}:${{ github.sha }}
       -
         name: Build and push multi-nginx
         uses: docker/build-push-action@v4
@@ -68,8 +69,8 @@ jobs:
           context: ./nginx
           push: true
           tags: |
-            hwxy233/multi-nginx:latest
-            hwxy233/multi-nginx:${{ github.sha }}
+            ${{ env.IMAGE_NAME_MUTLTI_NGINX }}:latest
+            ${{ env.IMAGE_NAME_MUTLTI_NGINX }}:${{ github.sha }}
       -
         name: Build and push multi-server
         uses: docker/build-push-action@v4
@@ -77,8 +78,8 @@ jobs:
           context: ./server
           push: true
           tags: |
-            hwxy233/multi-server:latest
-            hwxy233/multi-server:${{ github.sha }}
+            ${{ env.IMAGE_NAME_MUTLTI_SERVER }}:latest
+            ${{ env.IMAGE_NAME_MUTLTI_SERVER }}:${{ github.sha }}
       -
         name: Build and push multi-worker
         uses: docker/build-push-action@v4
@@ -86,5 +87,35 @@ jobs:
           context: ./worker
           push: true
           tags: |
-            hwxy233/multi-worker:latest
-            hwxy233/multi-worker:${{ github.sha }}
+            ${{ env.IMAGE_NAME_MUTLTI_WORKER }}:latest
+            ${{ env.IMAGE_NAME_MUTLTI_WORKER }}:${{ github.sha }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - 
+        name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - 
+        name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          images: |
+            '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_CLIENT }}'
+            '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_NGINX }}'
+            '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_SERVER }}'
+            '${{ env.REGISTRY }}/${{ env.IMAGE_NAME_MUTLTI_WORKER }}'
+          configuration-file:
+            ./docker-compose.yml
+          startup-command: "docker compose up -d"
+          
+      - 
+        name: Azure logout
+        run: |
+          az logout
