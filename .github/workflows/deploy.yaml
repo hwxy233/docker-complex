@@ -39,11 +39,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
+        name: Build and export to Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: ./client
+          file: Dockerfile.dev
+          load: true
+          tags: hwxy233/multi-client:test
+      -
+        name: Test
+        run: |
+          docker run --rm hwxy233/multi-client:test
+      -
         name: Build and push multi-client
         uses: docker/build-push-action@v4
         with:
           context: ./client
-          file: ./Dockerfile.dev
           push: true
           tags: |
             hwxy233/multi-client:latest
