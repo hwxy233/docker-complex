@@ -1,28 +1,31 @@
-version: "3"
+version: '3'
 services:
   postgres:
-    image: "postgres:latest"
+    image: 'docker.io/postgres:latest'
     environment:
       - POSTGRES_PASSWORD=postgres_password
   redis:
-    image: "redis:latest"
+    image: 'docker.io/redis:latest'
   nginx:
-    restart: always
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./nginx
-    ports:
-      - "3050:80"
+    image: 'docker.io/hwxy233/multi-nginx'
+    mem_limit: 128m
+    hostname: nginx
     depends_on:
       - api
       - client
+    restart: always
+    # azure app service only accept 8080 or 80 port
+    # https://learn.microsoft.com/zh-cn/azure/app-service/configure-custom-container?tabs=alpine&pivots=container-linux#use-persistent-storage-in-docker-compose
+    ports:
+      - '80:80'
   api:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./server
+    image: 'docker.io/hwxy233/multi-server'
+    mem_limit: 128m
+    hostname: api
     volumes:
-      - /app/node_modules
-      - ./server:/app
+      # if want to use bind volumns, should start with ${WEBAPP_STORAGE_HOME}
+      # https://learn.microsoft.com/zh-cn/azure/app-service/configure-custom-container?tabs=alpine&pivots=container-linux#use-persistent-storage-in-docker-compose
+      - node_modules:/app/node_modules
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
@@ -32,22 +35,21 @@ services:
       - PGPASSWORD=postgres_password
       - PGPORT=5432
   client:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./client
+    image: 'docker.io/hwxy233/multi-client'
+    mem_limit: 128m
+    hostname: client
     volumes:
-      - /app/node_modules
-      - ./client:/app
-    # fix websocket error
+      - node_modules:/app/node_modules
     environment:
       - WDS_SOCKET_PORT=0
   worker:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./worker
+    image: 'docker.io/hwxy233/multi-worker'
+    mem_limit: 128m
+    hostname: worker
     volumes:
-      - /app/node_modules
-      - ./worker:/app
+      - node_modules:/app/node_modules
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+volumes:
+  node_modules:
