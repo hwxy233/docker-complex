@@ -1,4 +1,4 @@
-name: Docker
+name: Deploy docker compose to azure app service
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
@@ -7,9 +7,9 @@ name: Docker
 
 on:
   push:
-    branches: [ "feature-test" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "feature-test" ]
+    branches: [ "master" ]
 
 env:
   # Use docker.io for Docker Hub if empty
